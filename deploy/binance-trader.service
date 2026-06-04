@@ -1,0 +1,15 @@
+[Unit]
+Description=Binance Auto Trading Daemon (WebSocket)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/.hermes/profiles/fengshengshuiqi/scripts
+EnvironmentFile=/home/ubuntu/.hermes/profiles/fengshengshuiqi/scripts/.env
+ExecStart=/usr/bin/python3 /home/ubuntu/.hermes/profiles/fengshengshuiqi/scripts/daemon_ws.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

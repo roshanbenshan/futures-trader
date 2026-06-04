@@ -1,0 +1,35 @@
+# 环境变量（含API密钥）
+.env
+.env.*
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# 交易数据（含敏感信息）
+scripts/trade_db.json
+scripts/futures_trades.json
+scripts/backup/
+scripts/.env
+
+# 非核心脚本（旧版/弃用/辅助）
+scripts/spot_trader.py
+scripts/bsc_scan.py
+scripts/bnb_watch.sh
+scripts/bsc_watch.sh
+scripts/coin_analysis.py
+scripts/kline_collector.py
+scripts/report_15m.sh
+scripts/trader_watchdog.sh
+scripts/watchdog.sh
+scripts/spot-trader.service
+
+# 日志
+*.log
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db

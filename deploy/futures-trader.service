@@ -1,0 +1,18 @@
+[Unit]
+Description=Futures Trader Daemon (auto-restart)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/.hermes/profiles/fengshengshuiqi/scripts
+ExecStart=/home/ubuntu/.hermes/hermes-agent/venv/bin/python3 -u futures_trader.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
