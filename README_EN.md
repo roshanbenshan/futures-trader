@@ -1,6 +1,6 @@
 # Futures Trader — Binance Perpetual Futures Auto-Trading System
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 ## [中文](README.md) | **English**
 
 > 🚀 **Running Live on Mainnet | Multi-Factor Scoring for Coin Selection | WebSocket Real-Time Data | Multi-Layer Risk Control**
@@ -267,7 +267,9 @@ Already running live for several weeks, validated through a complete market cycl
 
 ## 📄 License
 
-[MIT License](LICENSE) — Free to use, modify, and distribute commercially. Contributions welcome.
+[GNU General Public License v3 (GPL v3)](LICENSE)
+
+Derivative works **must remain open source** — no closed-source commercialization. Protecting community sharing so no one can slap a price tag on open code.
 
 ---
 

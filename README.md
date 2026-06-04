@@ -1,6 +1,6 @@
 # Futures Trader — Binance合约自动交易系统
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![中文](https://img.shields.io/badge/lang-中文-red.svg)](README.md)
 [![English](https://img.shields.io/badge/lang-English-blue.svg)](README_EN.md)
 
@@ -268,7 +268,9 @@ futures-trader/
 
 ## 📄 License
 
-[MIT License](LICENSE) — 随意使用、修改、商用，欢迎共建。
+[GNU General Public License v3 (GPL v3)](LICENSE)
+
+使用本代码的衍生作品**必须同样开源**，不得闭源商用。保护社区共享，防止他人拿开源代码改完就卖。
 
 ---
 
