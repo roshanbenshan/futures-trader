@@ -1,6 +1,8 @@
 # Futures Trader — Binance合约自动交易系统
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![中文](https://img.shields.io/badge/lang-中文-red.svg)](README.md)
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README_EN.md)
 
 > 🚀 **生产环境实盘运行 | 多因子评分选币 | WebSocket实时数据 | 多层风控保障**
 
