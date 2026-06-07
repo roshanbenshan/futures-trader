@@ -15,12 +15,16 @@ An automated trading bot running live on Binance perpetual futures markets. This
 
 ### Core Stats (Since Deployment)
 
-- **Win Rate**: ~43% (32 winning trades out of 74)
-- **Net P&L**: +$1.85 (after fees)
-- **Max Intraday Drawdown**: Tightly controlled, most losses <$0.50 per trade
-- **Largest Single Win**: +$48.70
+| Metric | Value |
+|--------|-------|
+| **Total Trades** | 63 |
+| **Net P&L** | **-$5.06** (excl fees) / **-$9.55** (incl fees) |
+| **Win Rate** | 8W / 19L = ~30% |
+| **Largest Win** | +$1.86 (ESPORTS) |
+| **Largest Loss** | -$1.50 (RKLB) |
+| **Avg Hold Time** | <60s (pre-v2.3) / Improved with grace period |
 
-> 💡 **How does a 43% win rate make money?** Risk-reward ratio. The average winning trade is 3–5× the average losing trade. Don't chase high win rates — chase "small losses, big wins."
+> 💡 **Lesson: Ten wins aren't enough if one loss wipes them out.** 30% win rate with net loss means both risk control and coin selection need fixing. v2.4 introduces **entry grace period, direction balancer, SWEEP/CONS_BULL fixes** to eliminate premature exits and short bias.
 
 ### Lessons We Learned the Hard Way (Real War Stories)
 
@@ -49,8 +53,19 @@ Total fees on 74 trades: ~$1.85 — nearly equal to total net profit. **With a s
 
 **Countermeasure**: The close-position function pulls the actual average fill price directly from Binance's order API, accounting for fees in the record.
 
-#### 🔴 Lesson 5: Direction Locks Are Neither Casual to Add Nor Remove
-Had a direction lock in place (forced reversal to longs after 6 consecutive shorts). A sloppy patch accidentally deleted it, causing ~$6 in losses. **Before touching code, write a checklist, verify the blast radius, then make the change.**
+#### 🔴 Lesson 6 (v2.4): SWEEP/CONS_BULL Used Pre-Entry Data to Kill Positions
+> Positions closed within 60 seconds by SWEEP/CONS_BULL — because the detection logic used the SAME 15m k-lines that triggered the entry signal.
+
+**Countermeasures**:
+- **300s Grace Period**: First 5 minutes after entry — skip waterfall/sweep/reversal detection, only use SL/TP OCO orders
+- **SWEEP checks closed candles only**: Filters out the forming 15m candle to avoid flicker false triggers
+- **CONS_BULL counts only post-entry candles**: Marked by `entry_kline_ts` — doesn't count candles that existed before entry
+- **Direction Balancer**: After 3 consecutive same-direction trades, force search in the opposite direction
+
+#### 🔴 Lesson 7 (v2.4): close_position_market Returns 4 Values but Call Sites Unpack 3
+> An embarrassingly simple bug — the function returns `(bool, price, 0, response)`, but all 9 call sites only wrote `success, fill_p, _`. Runtime crash on any close attempt.
+
+**Countermeasure**: All 9 call sites patched to unpack the 4th value.
 
 ---
 
@@ -162,16 +177,22 @@ Floor: SL = max(1.2%, ATR × 0.5)
 
 ### Layer 4: Live Monitoring
 - **Waterfall Protection**: Price drops 3% rapidly → force close
-- **Sweep Protection**: 15m large bullish/bearish candle with rapid reversal
+- **Sweep Protection**: 15m large bullish/bearish candle with rapid reversal (**v2.4: checks closed candles only, skipped during 300s grace period**)
 - **Trailing Stop on Profit**: Automatic take-profit when profit retracement hits threshold
-- **Reversal Alert**: RSI + MA indicator combo monitors trend reversal
+- **Reversal Alert**: RSI + MA indicator combo monitors trend reversal (**v2.4: skipped during 300s grace period**)
+- **v2.4 Direction Balancer**: After 3 consecutive same-direction trades, force opposite direction
 
-### Layer 5: Data Integrity
+### Layer 5: Entry Grace Period (v2.4 New)
+- **300s Grace Period**: First 5 minutes after opening — only hard SL/TP (±6% OCO) + active risk management (breakeven/partial TP/trailing) are active
+- **Reversal Alerts / Waterfall / Sweep all skipped** — letting the position actually breathe and reach profit zone
+- All monitoring layers automatically reactivate after the grace period ends
+
+### Layer 6: Data Integrity
 - Orders with volume = 0 are rejected from recording
 - Exit prices ≤ 0 are rejected as bad data
 - Redis data cross-verified daily against Binance API
 
-### Layer 6: System Level
+### Layer 7: System Level
 - systemd auto-restart (back in 5 seconds after crash)
 - Dual-instance detection (PID lock on startup)
 - Single-instance guard (rejects duplicate launches)
@@ -261,9 +282,16 @@ futures-trader/
 
 ## 🔄 Version
 
-Current version: v1.0 — Production-stable release.
+Current version: **[v2.4](https://github.com/roshanbenshan/futures-trader/releases/tag/v2.4)** — Win Rate Improvement Release
 
-Already running live for several weeks, validated through a complete market cycle. Continuously iterating.
+### v2.4 Core Improvements
+- 🛡️ **300s Entry Grace Period**: Skip waterfall/sweep/reversal in first 5 min, only SL/TP
+- 🔧 **SWEEP Fix**: Checks closed candles only + denominator uses `last['o']` not entry
+- 🔧 **CONS_BULL Fix**: Counts only post-entry bullish candles via `entry_kline_ts`
+- ⚖️ **Direction Balancer**: 3 consecutive same-direction → force opposite, breaking short bias
+- 🐛 **Close Crash Fix**: All 9 call sites patched to unpack 4th return value
+
+[Full Changelog →](CHANGELOG.md)
 
 ---
 
