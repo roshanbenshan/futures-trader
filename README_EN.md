@@ -4,6 +4,8 @@
 ## [中文](README.md) | **English**
 
 > 🚀 **Running Live on Mainnet | Multi-Factor Scoring for Coin Selection | WebSocket Real-Time Data | Multi-Layer Risk Control**
+>
+> 📖 **[Changelog →](CHANGELOG.md)**
 
 An automated trading bot running live on Binance perpetual futures markets. This isn't a paper-trading strategy experiment — it's a **battle-tested system forged with real money in live markets**.
 
