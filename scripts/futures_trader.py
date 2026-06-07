@@ -1009,7 +1009,7 @@ async def close_position_market(sym_upper, amt, reason_tag):
         if cum_qty <= 0:
             return False, 0, 0, d  # 实际未成交（另一实例已平或错误）
         fill_price = cum_quote / cum_qty
-    return True, fill_price, d
+    return True, fill_price, 0, d
 
 
 def record_trade(sym, side, entry, exit_price, qty, reason, setup='UNKNOWN'):
@@ -2229,7 +2229,7 @@ async def monitor_and_exit(sym, p, bal):
     if pnl_pct >= 6.0:
         state.setdefault('exiting', set()).add(sym)
         print(f"  🎯 +6%止盈!")
-        success, fill_p, _ = await close_position_market(sym.upper(), amt, REASON_TP)
+        success, fill_p, _, _ = await close_position_market(sym.upper(), amt, REASON_TP)
         if success:
             actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
             print(f"  ✅ 盈利${actual_pnl:.2f} (实际均价${fill_p:.4f})")
@@ -2241,7 +2241,7 @@ async def monitor_and_exit(sym, p, bal):
     if pnl_pct <= -6.0:
         state.setdefault('exiting', set()).add(sym)
         print(f"  🛑 -6%止损!")
-        success, fill_p, _ = await close_position_market(sym.upper(), amt, REASON_SL)
+        success, fill_p, _, _ = await close_position_market(sym.upper(), amt, REASON_SL)
         if success:
             actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
             print(f"  ✅ 亏损${abs(actual_pnl):.2f} (实际均价${fill_p:.4f})")
@@ -2356,7 +2356,7 @@ async def monitor_and_exit(sym, p, bal):
         if hold_mins > MAX_HOLD_MINS and pnl_pct <= 1.0:
             print(f"  ⏰ 时间止损: 持仓{hold_mins:.0f}分钟无进展,主动平仓")
             state.setdefault('exiting', set()).add(sym)
-            success, fill_p, _ = await close_position_market(sym.upper(), amt, 'TIME_STOP')
+            success, fill_p, _, _ = await close_position_market(sym.upper(), amt, 'TIME_STOP')
             if success:
                 actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
                 print(f"  ✅ 时间止损平仓 盈亏: ${actual_pnl:.2f} (实际均价${fill_p:.4f})")
@@ -2431,7 +2431,7 @@ async def monitor_and_exit(sym, p, bal):
             print(f"  🚨 反转预警! 平仓!")
             push_event('alert', {'level': 'WARN_EXIT', 'sym': sym, 'msg': f'反转预警平仓', 'pnl': round(upnl, 2)})
             state.setdefault('exiting', set()).add(sym)
-            success, fill_p, _ = await close_position_market(sym.upper(), amt, 'REVERSAL_WARN')
+            success, fill_p, _, _ = await close_position_market(sym.upper(), amt, 'REVERSAL_WARN')
             if success:
                 actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
                 print(f"  ✅ 平仓 盈亏: ${actual_pnl:+.2f} (实际均价${fill_p:.4f})")
@@ -2484,7 +2484,7 @@ async def monitor_and_exit(sym, p, bal):
                 if (going_up and is_short) or (not going_up and not is_short):
                     print(f"  🔄 1h逆势! ADX={adx1h:.1f} {'上升' if going_up else '下降'}中方向相反，平仓!")
                     state.setdefault('exiting', set()).add(sym)
-                    success, fill_p, _ = await close_position_market(sym_upper, amt, '1H_REVERSAL')
+                    success, fill_p, _, _ = await close_position_market(sym_upper, amt, '1H_REVERSAL')
                     if success:
                         actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
                         print(f"  ✅ 平仓 盈亏: ${actual_pnl:+.2f} (实际均价${fill_p:.4f})")
@@ -2516,7 +2516,7 @@ async def monitor_and_exit(sym, p, bal):
                 if is_waterfall:
                     state.setdefault('exiting', set()).add(sym)
                     print(f"  🌊 瀑布保护! {sym} {'急跌' if not is_short else '急涨'} 清仓!")
-                    success, fill_p, _ = await close_position_market(sym.upper(), amt, REASON_WATERFALL)
+                    success, fill_p, _, _ = await close_position_market(sym.upper(), amt, REASON_WATERFALL)
                     if success:
                         actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
                         print(f"  ✅ 已清仓 亏损: ${abs(actual_pnl):.2f} (实际均价${fill_p:.4f})")
@@ -2539,7 +2539,7 @@ async def monitor_and_exit(sym, p, bal):
             if chg > SWEEP_CHG_MIN and body > avg_body * SWEEP_BODY_MULT:
                 state.setdefault('exiting', set()).add(sym)
                 print(f"  ⚡15m横扫! 平仓!")
-                success, fill_p, _ = await close_position_market(sym.upper(), amt, REASON_SWEEP)
+                success, fill_p, _, _ = await close_position_market(sym.upper(), amt, REASON_SWEEP)
                 if success:
                     actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
                     print(f"  ✅ 平仓! 亏损: ${abs(actual_pnl):.2f} (实际均价${fill_p:.4f})")
@@ -2552,7 +2552,7 @@ async def monitor_and_exit(sym, p, bal):
             if bc >= CONSISTENT_BULL:
                 state.setdefault('exiting', set()).add(sym)
                 print(f"  🔴 连续{bc}根阳线! 平仓!")
-                success, fill_p, _ = await close_position_market(sym.upper(), amt, REASON_CONS_BULL)
+                success, fill_p, _, _ = await close_position_market(sym.upper(), amt, REASON_CONS_BULL)
                 if success:
                     actual_pnl = (fill_p - entry) * abs(amt) if amt > 0 else (entry - fill_p) * abs(amt)
                     print(f"  ✅ 平仓! 亏损: ${abs(actual_pnl):.2f} (实际均价${fill_p:.4f})")
